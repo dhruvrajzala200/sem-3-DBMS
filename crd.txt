@@ -1,0 +1,95 @@
+
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+const String NAME = "Name";
+const String CITY = "City";
+const String COLUMN_ID = "id";
+const String TABLE_NAME = "crud";
+
+
+class MyApi{
+
+  Future<void> addUser(Map<String , dynamic> user) async{
+    final response = await http.post(
+      Uri.parse("https://67cee03e823da0212a808215.mockapi.io/users"),
+
+      headers: <String , String>{
+        'Content-Type' : "application/json; charset=UTF-8",
+      },
+
+      body: jsonEncode({
+        NAME : user[NAME],
+        CITY : user[CITY]
+      }),
+    );
+
+    if(response.statusCode == 201){
+      print("User Added Successfully");
+      getUserList();
+    }
+    else{
+      print("Failed to add");
+    }
+  }
+
+  Future<List<Map<String , dynamic>>> getUserList() async {
+    final response = await http.get(Uri.parse("https://67cee03e823da0212a808215.mockapi.io/users"));
+
+    if(response.statusCode == 200){
+      List<dynamic> jsonData = jsonDecode(response.body);
+
+      List<Map<String , dynamic>> userList = jsonData.map((user) {
+        return {
+          COLUMN_ID : user[COLUMN_ID],
+          NAME : user[NAME],
+          CITY : user[CITY]
+        };
+      }).toList();
+      return userList;
+    }
+    return [];
+  }
+
+  Future<void> updateUser(String id , Map<String , dynamic> user) async{
+    try{
+      final response = await http.put(Uri.parse("https://67cee03e823da0212a808215.mockapi.io/users/$id"),
+
+        headers: <String , String> {
+          'Content-Type' : "application/json; charset=UTF-8",
+        },
+
+        body: jsonEncode({
+          NAME : user[NAME],
+          CITY : user[CITY]
+        }),
+      );
+
+      if(response.statusCode == 200){
+        print("User Update Successfully");
+        getUserList();
+      }
+      else{
+        print("Failed to update");
+      }
+    }
+    catch(error){
+      print("Error occured $error");
+    }
+  }
+
+  Future<void> deleteUser(String id) async{
+    final response = await http.delete(Uri.parse("https://67cee03e823da0212a808215.mockapi.io/users/$id"),);
+
+    if(response.statusCode == 200){
+      print("Deleted Successfully");
+    }
+
+    else{
+      print("error :: ");
+    }
+
+    getUserList();
+  }
+
+}
